@@ -1,6 +1,8 @@
 import parameterize from "@/util/parameterize"
 import { ResponseTable } from "@/response-table"
 import moment from "moment"
+import SecureLS from "secure-ls";
+
 
 export class Query {
   resource: any
@@ -329,12 +331,22 @@ export class Query {
     let headers = new Headers()
     headers.append('pragma', 'no-cache')
     headers.append('cache-control', 'no-cache')
-    headers.append('api-key', 'x9hNHXT9BY8A2wDh9UsA')
     headers.append('content-type', 'application/json')
 
-    if (this.includeAuth) {
-      headers.append('Authorization', this.token)
+    const ls = new SecureLS({ encodingType: "aes", isCompression: false });
+
+    for (var i = 0; true; i++) {
+      if (document.getElementById(`${i}_headerKey`) && document.getElementById(`${i}_headerValue`)) {
+        const key = (document.getElementById(`${i}_headerKey`) as HTMLInputElement).value
+        const value = (document.getElementById(`${i}_headerValue`) as HTMLInputElement).value
+        headers.append(key, value)
+        ls.set(`${i}_headerKey`, key)
+        ls.set(`${i}_headerValue`, value)
+      } else {
+        break;
+      }
     }
-    return headers
+
+    return headers;
   }
 }

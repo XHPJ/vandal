@@ -10,28 +10,27 @@
       class="top-level-contents"
       :class="{ resetting }"
     >
-      <div class="card left-rail row">
-        <span
-          class="fa-stack fa-2x"
-          @click="setAuth"
-        >
-          <i
-            class="fas fa-key fa-stack-1x"
-            style="color: orange"
-          ></i>
-          <i
-            class="fas fa-ban fa-stack-2x"
-            id="cross"
-            style="color: lightgray"
-          ></i>
-        </span>
-        <input
-          v-if="useAuth"
-          v-model="token"
-          type="text"
-          class="float-right"
-          placeholder="Enter Auth Token"
-        />
+      <div class="card">
+        <div class="row">
+          <div class="column left">
+            <a
+              @click="addHeaderInput"
+              class="add"
+            >Add Header+</a>
+          </div>
+
+          <div class="column right">
+            <div
+              class="row full-width"
+              id="headerCard"
+            ></div>
+            <a
+              v-if="headerCounter > 0"
+              @click="removeHeader"
+              style="color:red; font-weight:bold; margin-left:10px;"
+            >x</a>
+          </div>
+        </div>
       </div>
 
       <div class="row">
@@ -227,6 +226,8 @@ export default Vue.extend({
       resetting: false as boolean,
       useAuth: false as boolean,
       token: null as string,
+      headerCounter: 0,
+      headers: [],
     };
   },
   created() {
@@ -405,6 +406,53 @@ export default Vue.extend({
       }
       this.query.payload = jsonPayload;
       console.log(jsonPayload);
+    },
+    addHeaderInput() {
+      var card = document.getElementById("headerCard") as HTMLElement;
+      var child = document.createElement("div");
+      child.id = `header_${this.headerCounter}`;
+      const keyInput = document.createElement("input");
+      const valueInput = document.createElement("input");
+      const icon = document.createElement("i");
+      const cross = document.createElement("a");
+
+      icon.className = "fas fa-tag";
+      icon.setAttribute(
+        "style",
+        "color: orange; font-size: 20px; margin-right: 10px;"
+      );
+      keyInput.id = `${this.headerCounter}_headerKey`;
+      keyInput.type = "text";
+      keyInput.className = "keyInput";
+
+      valueInput.id = `${this.headerCounter}_headerValue`;
+      valueInput.type = "text";
+
+      if (ls.get(keyInput.id)) {
+        keyInput.value = ls.get(keyInput.id);
+        valueInput.value = ls.get(valueInput.id);
+      }
+
+      child.setAttribute(
+        "style",
+        "width: 100%; margin-top: 5px; margin-bottom: 5px;"
+      );
+
+      child.appendChild(icon);
+      child.appendChild(keyInput);
+      child.appendChild(valueInput);
+      child.appendChild(cross);
+
+      card.appendChild(child);
+      this.headerCounter++;
+    },
+    removeHeader() {
+      this.headerCounter--;
+
+      const elementToRemove = document.getElementById(
+        `header_${this.headerCounter}`
+      );
+      elementToRemove.remove();
     },
   },
 });
@@ -793,5 +841,22 @@ pre {
 }
 .card {
   margin: 1%;
+}
+
+.column {
+  float: left;
+}
+
+.left {
+  width: 15%;
+}
+
+.right {
+  width: 75%;
+}
+
+.keyInput {
+  color: steelblue;
+  font-weight: bold;
 }
 </style>
