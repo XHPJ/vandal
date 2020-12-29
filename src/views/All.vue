@@ -11,16 +11,27 @@
       :class="{ resetting }"
     >
       <div class="card left-rail row">
-            <span class="fa-stack fa-2x" @click="setAuth">
-            <i class="fas fa-key fa-stack-1x" style="color:orange"></i>
-            <i class="fas fa-ban fa-stack-2x" id="cross" style="color:lightgray"></i>
-            </span>
-          <input  v-if="useAuth"
-                  v-model="token" 
-                  type="text" 
-                  class="float-right" 
-                  placeholder="Enter Auth Token"
-                  />      
+        <span
+          class="fa-stack fa-2x"
+          @click="setAuth"
+        >
+          <i
+            class="fas fa-key fa-stack-1x"
+            style="color: orange"
+          ></i>
+          <i
+            class="fas fa-ban fa-stack-2x"
+            id="cross"
+            style="color: lightgray"
+          ></i>
+        </span>
+        <input
+          v-if="useAuth"
+          v-model="token"
+          type="text"
+          class="float-right"
+          placeholder="Enter Auth Token"
+        />
       </div>
 
       <div class="row">
@@ -50,6 +61,9 @@
                 :schema="schema"
                 :depth="0"
                 :isShowAction="isShowAction"
+                :isCreateAction="isCreateAction"
+                :isUpdateAction="isUpdateAction"
+                :isDestroyAction="isDestroyAction"
               />
             </endpoint-list>
           </div>
@@ -62,7 +76,7 @@
             :firing="firing"
           />
 
-          <div :class="'request card '+ currentTab.name+'' ">
+          <div :class="'request card ' + currentTab.name + ''">
             <transition name="request-card">
               <div
                 key="1"
@@ -132,7 +146,8 @@
 
                 <div v-if="!query.hasRawError">
                   <br />
-                  <span class="text-muted">Server configured to hide additional debug information.</span>
+                  <span class="text-muted">Server configured to hide additional debug
+                    information.</span>
                 </div>
               </div>
             </div>
@@ -140,9 +155,7 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      Loading...
-    </div>
+    <div v-else>Loading...</div>
 
     <transition name="modal">
       <div
@@ -188,7 +201,7 @@ import UrlBar from "@/components/UrlBar.vue";
 import EventBus from "@/event-bus.ts";
 import SecureLS from "secure-ls";
 
-const ls = new SecureLS({encodingType: 'aes', isCompression: false});
+const ls = new SecureLS({ encodingType: "aes", isCompression: false });
 const tabs = [{ name: "results" }, { name: "raw" }, { name: "debug" }];
 
 export default Vue.extend({
@@ -217,8 +230,8 @@ export default Vue.extend({
     };
   },
   created() {
-    if(ls.get("token")) {
-      this.token = ls.get("token")
+    if (ls.get("token")) {
+      this.token = ls.get("token");
     }
   },
   mounted() {
@@ -231,22 +244,35 @@ export default Vue.extend({
   },
   computed: {
     isShowAction(): any {
-      if (this.query) return this.query.endpoint.includes("#show");
+      if (this.query)
+        return (
+          this.query.endpoint.includes("#show") ||
+          this.query.endpoint.includes("#index")
+        );
+    },
+    isCreateAction(): any {
+      if (this.query) return this.query.endpoint.includes("#create");
+    },
+    isUpdateAction(): any {
+      if (this.query) return this.query.endpoint.includes("#update");
+    },
+    isDestroyAction(): any {
+      if (this.query) return this.query.endpoint.includes("#destroy");
     },
   },
   watch: {
     token() {
       ls.remove("token");
-      ls.set("token", this.token)
-      if( this.query ) {
+      ls.set("token", this.token);
+      if (this.query) {
         this.query.token = this.token;
       }
     },
     useAuth() {
-      if( this.query ) {
+      if (this.query) {
         this.query.includeAuth = this.useAuth;
       }
-    }
+    },
   },
   methods: {
     onModalToggle(content: string) {
@@ -278,6 +304,7 @@ export default Vue.extend({
     },
     reset(endpoint: string, animate: boolean = true) {
       if (animate) this.resetting = true;
+      console.log(endpoint);
       this.query = new Query(this.schema, this.resource, endpoint);
       this.query.includeAuth = this.useAuth;
       this.query.token = this.token;
@@ -287,20 +314,34 @@ export default Vue.extend({
       if (animate) setTimeout(doReset, 100);
     },
     async fetch() {
-      if (this.validate()) {
-        this.firing = true;
-        let unfire = () => {
-          this.firing = false;
-        };
-        setTimeout(unfire, 100);
-        this.isLoading = true;
-        let then = Date.now();
+      console.log(this.query);
+      console.log(this.schema);
+      this.firing = true;
+      let unfire = () => {
+        this.firing = false;
+      };
+      setTimeout(unfire, 100);
+      this.isLoading = true;
+      let then = Date.now();
+      if (this.isShowAction) {
         await this.query.fire();
-        let now = Date.now();
-        // Force min of 100ms
-        await this.stall(100 - (now - then));
-        this.isLoading = false;
+      } else if (this.isCreateAction) {
+        this.createPayload();
+        await this.query.create();
+      } else if (this.isUpdateAction) {
+        this.createPayload();
+        await this.query.update(
+          (document.getElementById("targetId") as HTMLInputElement).value
+        );
+      } else {
+        await this.query.destroy(
+          (document.getElementById("targetId") as HTMLInputElement).value
+        );
       }
+      let now = Date.now();
+      // Force min of 100ms
+      await this.stall(100 - (now - then));
+      this.isLoading = false;
     },
     validate() {
       // Object.keys(this.query.resource.filters).forEach((k) => {
@@ -333,14 +374,38 @@ export default Vue.extend({
     setAuth() {
       var cross = document.getElementById("cross");
       if (cross.style.display === "none") {
-        console.log("block")
+        console.log("block");
         cross.style.display = "block";
         this.useAuth = false;
       } else {
         cross.style.display = "none";
         this.useAuth = true;
       }
-    }
+    },
+    createPayload() {
+      var jsonPayload = { data: { attributes: {}, type: "" } };
+      console.log(this.query);
+      const attributes = this.query.resource.attributes;
+      for (let attribute in attributes) {
+        if (attribute == "id") {
+          continue;
+        }
+        const fieldValue = (document.getElementById(
+          attribute
+        ) as HTMLInputElement).value;
+        if (fieldValue != "") {
+          jsonPayload.data.attributes[attribute] = fieldValue;
+        }
+      }
+      jsonPayload.data.type = this.query.resource.type;
+      if (this.isUpdateAction) {
+        jsonPayload.data["id"] = (document.getElementById(
+          "targetId"
+        ) as HTMLInputElement).value;
+      }
+      this.query.payload = jsonPayload;
+      console.log(jsonPayload);
+    },
   },
 });
 </script>

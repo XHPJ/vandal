@@ -13,6 +13,7 @@ export class Query {
   fields: any
 
   data: any
+  payload: any
   headers: any[]
   includeAuth: boolean
   token: string
@@ -40,6 +41,7 @@ export class Query {
     this.headers = []
     this.includeAuth = false
     this.token = ''
+    this.payload = {}
     this.url = null
     this.urlWithDomain = null
     this.page = {}
@@ -58,7 +60,7 @@ export class Query {
     }
   }
 
-  derivePossibleRelationships (): any {
+  derivePossibleRelationships(): any {
     if (this.resource.polymorphic) {
       let relationships = Object.assign({}, this.resource.relationships)
       this.resource.children.forEach((name: string) => {
@@ -71,18 +73,18 @@ export class Query {
     }
   }
 
-  isShowRoute (): boolean {
+  isShowRoute(): boolean {
     return this.endpoint && this.endpoint.includes('#show')
   }
 
-  hasFilterValue (name: string) {
+  hasFilterValue(name: string) {
     let found = this.filters.filter((f) => {
       return f.name === name
     })[0]
     return !!(found && found.value)
   }
 
-  generateParams () {
+  generateParams() {
     let params = {}
     Object.assign(params, { filter: this.filterParams() })
     Object.assign(params, { sort: this.sortParams().join(',') })
@@ -92,7 +94,7 @@ export class Query {
     return params
   }
 
-  generateUrl () {
+  generateUrl() {
     let params = this.generateParams()
     let [path, action] = this.endpoint.split('#')
     let paramStr = parameterize(params)
@@ -101,7 +103,7 @@ export class Query {
     return path
   }
 
-  generateCurl () {
+  generateCurl() {
     let url = this.urlWithDomain
     let [base, params] = url.split('?')
     url = base
@@ -111,24 +113,78 @@ export class Query {
     return `curl -g -H 'Content-Type: application/json' '${url}'`
   }
 
-  async fire () {
+  async fire() {
     this.url = this.generateUrl()
     this.urlWithDomain = `${window.location.origin}${this.url}`
 
-    let headers = new Headers()
-    headers.append('pragma', 'no-cache')
-    headers.append('cache-control', 'no-cache')
-
-    if (this.includeAuth) {
-      headers.append('Authorization', this.token)
+    let init = {
+      method: 'GET',
+      headers: this.setHeaders()
     }
-    let init = { method: 'GET', headers }
     let request = new Request(this.url)
     this.json = await (await fetch(request, init)).json()
     this.ready = true
     this.hasRawError = false
     this.error = null
 
+    this.handleError()
+  }
+
+  async create() {
+    this.url = this.generateUrl()
+    this.urlWithDomain = `${window.location.origin}${this.url}`
+
+    let init = {
+      method: 'POST',
+      headers: this.setHeaders(),
+      body: JSON.stringify(this.payload)
+    }
+    let request = new Request(this.url)
+    this.json = await (await fetch(request, init)).json()
+    this.ready = true
+    this.hasRawError = false
+    this.error = null
+
+    this.handleError()
+  }
+
+  async update(id: string) {
+    this.url = `${this.generateUrl()}/${id}`
+    this.urlWithDomain = `${window.location.origin}${this.url}/${id}`
+
+    let init = {
+      method: 'PATCH',
+      headers: this.setHeaders(),
+      body: JSON.stringify(this.payload)
+    }
+    let request = new Request(this.url)
+    this.json = await (await fetch(request, init)).json()
+    this.ready = true
+    this.hasRawError = false
+    this.error = null
+
+    this.handleError()
+  }
+
+  async destroy(id: string) {
+    this.url = `${this.generateUrl()}/${id}`
+    this.urlWithDomain = `${window.location.origin}${this.url}/${id}`
+
+
+    let init = {
+      method: 'DELETE',
+      headers: this.setHeaders()
+    }
+    let request = new Request(this.url)
+    this.json = await (await fetch(request, init)).json()
+    this.ready = true
+    this.hasRawError = false
+    this.error = null
+
+    this.handleError()
+  }
+
+  handleError() {
     if (this.json.errors) {
       let error = this.json.errors[0]
       let message = error.detail
@@ -142,10 +198,9 @@ export class Query {
       this.data = new ResponseTable(this.schema, this.resource, this.json, this.json.data, this.includeHash())
     }
   }
-
   // param generation
 
-  filterParams () {
+  filterParams() {
     let _filters = {} as any
     this.filters.forEach((filter) => {
       if (filter.name) {
@@ -179,7 +234,7 @@ export class Query {
     return _filters
   }
 
-  sortParams () {
+  sortParams() {
     let _sorts = [] as any
     this.sorts.forEach((sort) => {
       if (sort.name) {
@@ -206,7 +261,7 @@ export class Query {
     return _sorts
   }
 
-  paginationParams () {
+  paginationParams() {
     let params = {} as any
     Object.keys(this.page).forEach((k) => {
       let name = k
@@ -226,7 +281,7 @@ export class Query {
     return params
   }
 
-  includes (): string[] {
+  includes(): string[] {
     let _includes = [] as any
 
     Object.keys(this.relationships).forEach((k) => {
@@ -243,7 +298,7 @@ export class Query {
     return _includes
   }
 
-  includeHash () {
+  includeHash() {
     let hash = {}
     this.includes().forEach((path) => {
       if (path) {
@@ -254,7 +309,7 @@ export class Query {
     return hash
   }
 
-  fieldParams () {
+  fieldParams() {
     let _fields = {} as any
 
     let selectedFields = Object.keys(this.fields)
@@ -268,5 +323,18 @@ export class Query {
     })
 
     return _fields
+  }
+
+  setHeaders(): Headers {
+    let headers = new Headers()
+    headers.append('pragma', 'no-cache')
+    headers.append('cache-control', 'no-cache')
+    headers.append('api-key', 'x9hNHXT9BY8A2wDh9UsA')
+    headers.append('content-type', 'application/json')
+
+    if (this.includeAuth) {
+      headers.append('Authorization', this.token)
+    }
+    return headers
   }
 }
