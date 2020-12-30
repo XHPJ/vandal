@@ -367,9 +367,6 @@ export default Vue.extend({
       payload: null as string,
     };
   },
-  created() {
-    console.log(this.query.schema);
-  },
   computed: {},
   methods: {
     addFilter() {

@@ -14,11 +14,15 @@
         <div class="col-3 left-rail card">
           <label>Server url</label>
           <div>
-            <Vselect
-              v-if="useCustomUrl"
-              :options="remoteHosts"
-              placeholder="no remote servers found"
-            ></Vselect>
+            <div v-if="useCustomUrl">
+              <select v-model="serverUrl">
+                <option
+                  v-for="host in remoteHosts"
+                  :value="`${host.url}${host.schemaPath}`"
+                  :key="host.name"
+                >{{ host.name }}</option>
+              </select>
+            </div>
             <a
               v-if="!useCustomUrl"
               @click="useCustomUrl=!useCustomUrl"
@@ -256,15 +260,15 @@ export default Vue.extend({
     };
   },
   created() {
-    if (ls.get("remoteUrl")) this.serverUrl = ls.get("remoteUrl");
-    console.log(process.env.REMOTE_HOSTS);
-    this.remoteHosts = JSON.parse(process.env.REMOTE_HOSTS);
-    console.log(this.remoteHosts);
+    this.remoteHosts = JSON.parse(
+      document
+        .querySelector("meta[name='REMOTE_HOSTS']")
+        .getAttribute("content")
+    );
   },
   watch: {
     serverUrl() {
       this.fetchSchema();
-      ls.set("remoteUrl", this.serverUrl);
     },
     useCustomUrl() {
       this.fetchSchema();
@@ -324,7 +328,6 @@ export default Vue.extend({
           .querySelector("meta[name='schema']")
           .getAttribute("content");
       }
-      console.log(schemaPath);
       let request = new Request(schemaPath);
       let schemaJson = await (await fetch(request, init)).json();
       this.schema = new Schema(schemaJson);
@@ -335,7 +338,6 @@ export default Vue.extend({
     },
     reset(endpoint: string, animate: boolean = true) {
       if (animate) this.resetting = true;
-      console.log(endpoint);
       this.query = new Query(this.schema, this.resource, endpoint);
       if (this.useCustomUrl) {
         this.query.useRemoteUrl = true;
@@ -347,8 +349,6 @@ export default Vue.extend({
       if (animate) setTimeout(doReset, 100);
     },
     async fetch() {
-      console.log(this.query);
-      console.log(this.schema);
       this.firing = true;
       let unfire = () => {
         this.firing = false;
@@ -406,7 +406,6 @@ export default Vue.extend({
     },
     createPayload() {
       var jsonPayload = { data: { attributes: {}, type: "" } };
-      console.log(this.query);
       const attributes = this.query.resource.attributes;
       for (let attribute in attributes) {
         if (attribute == "id") {
@@ -426,7 +425,6 @@ export default Vue.extend({
         ) as HTMLInputElement).value;
       }
       this.query.payload = jsonPayload;
-      console.log(jsonPayload);
     },
     addHeaderInput() {
       var card = document.getElementById("headerCard") as HTMLElement;
