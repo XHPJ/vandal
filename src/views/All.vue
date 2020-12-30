@@ -10,25 +10,47 @@
       class="top-level-contents"
       :class="{ resetting }"
     >
-      <div class="card">
-        <div class="row">
-          <div class="column left">
+      <div class="row">
+        <div class="col-3 left-rail card">
+          <label>Server url</label>
+          <div>
+            <Vselect
+              v-if="useCustomUrl"
+              :options="remoteHosts"
+              placeholder="no remote servers found"
+            ></Vselect>
             <a
-              @click="addHeaderInput"
-              class="add"
-            >Add Header+</a>
+              v-if="!useCustomUrl"
+              @click="useCustomUrl=!useCustomUrl"
+              style="color:orange; margin-left:1%;"
+            >Use remote Server</a>
+            <a
+              v-else
+              @click="useCustomUrl=!useCustomUrl"
+              style="color:orange; margin-left:1%;"
+            >Use default Server</a>
           </div>
+        </div>
+        <div class="col-8 main card">
+          <div class="row">
+            <div class="column left">
+              <a
+                @click="addHeaderInput"
+                class="add"
+              >Add Header+</a>
+            </div>
 
-          <div class="column right">
-            <div
-              class="row full-width"
-              id="headerCard"
-            ></div>
-            <a
-              v-if="headerCounter > 0"
-              @click="removeHeader"
-              style="color:red; font-weight:bold; margin-left:10px;"
-            >x</a>
+            <div class="column right">
+              <div
+                class="row full-width"
+                id="headerCard"
+              ></div>
+              <a
+                v-if="headerCounter > 0"
+                @click="removeHeader"
+                style="color:red; font-weight:bold; margin-left:10px;"
+              >x</a>
+            </div>
           </div>
         </div>
       </div>
@@ -199,6 +221,7 @@ import EndpointList from "@/components/EndpointList.vue";
 import UrlBar from "@/components/UrlBar.vue";
 import EventBus from "@/event-bus.ts";
 import SecureLS from "secure-ls";
+import Vselect from "vue-select";
 
 const ls = new SecureLS({ encodingType: "aes", isCompression: false });
 const tabs = [{ name: "results" }, { name: "raw" }, { name: "debug" }];
@@ -210,6 +233,7 @@ export default Vue.extend({
     DataTable,
     ResourceForm,
     UrlBar,
+    Vselect,
   },
   data() {
     return {
@@ -224,16 +248,27 @@ export default Vue.extend({
       modalContent: null as string | null,
       firing: false as boolean,
       resetting: false as boolean,
-      useAuth: false as boolean,
-      token: null as string,
+      useCustomUrl: false as boolean,
       headerCounter: 0,
       headers: [],
+      serverUrl: null as string,
+      remoteHosts: JSON,
     };
   },
   created() {
-    if (ls.get("token")) {
-      this.token = ls.get("token");
-    }
+    if (ls.get("remoteUrl")) this.serverUrl = ls.get("remoteUrl");
+    console.log(process.env.REMOTE_HOSTS);
+    this.remoteHosts = JSON.parse(process.env.REMOTE_HOSTS);
+    console.log(this.remoteHosts);
+  },
+  watch: {
+    serverUrl() {
+      this.fetchSchema();
+      ls.set("remoteUrl", this.serverUrl);
+    },
+    useCustomUrl() {
+      this.fetchSchema();
+    },
   },
   mounted() {
     this.fetchSchema();
@@ -261,20 +296,6 @@ export default Vue.extend({
       if (this.query) return this.query.endpoint.includes("#destroy");
     },
   },
-  watch: {
-    token() {
-      ls.remove("token");
-      ls.set("token", this.token);
-      if (this.query) {
-        this.query.token = this.token;
-      }
-    },
-    useAuth() {
-      if (this.query) {
-        this.query.includeAuth = this.useAuth;
-      }
-    },
-  },
   methods: {
     onModalToggle(content: string) {
       this.modalContent = content;
@@ -294,12 +315,21 @@ export default Vue.extend({
       headers.append("pragma", "no-cache");
       headers.append("cache-control", "no-cache");
       let init = { method: "GET", headers };
-      let schemaPath = document
-        .querySelector("meta[name='schema']")
-        .getAttribute("content");
+      var schemaPath;
+      if (this.useCustomUrl && this.useCustomUrl) {
+        schemaPath = this.serverUrl;
+        headers.append("Access-Control-Allow-Origin", "*");
+      } else {
+        schemaPath = document
+          .querySelector("meta[name='schema']")
+          .getAttribute("content");
+      }
+      console.log(schemaPath);
       let request = new Request(schemaPath);
       let schemaJson = await (await fetch(request, init)).json();
       this.schema = new Schema(schemaJson);
+      this.schema.useCustomUrl = this.useCustomUrl;
+      this.schema.remoteUrl = this.serverUrl;
       this.schema._processRemoteResources();
       return this.schema;
     },
@@ -307,8 +337,10 @@ export default Vue.extend({
       if (animate) this.resetting = true;
       console.log(endpoint);
       this.query = new Query(this.schema, this.resource, endpoint);
-      this.query.includeAuth = this.useAuth;
-      this.query.token = this.token;
+      if (this.useCustomUrl) {
+        this.query.useRemoteUrl = true;
+        this.query.remoteUrl = this.serverUrl;
+      }
       let doReset = () => {
         this.resetting = false;
       };
@@ -371,17 +403,6 @@ export default Vue.extend({
     },
     stall(stallTime = 3000) {
       return new Promise((resolve) => setTimeout(resolve, stallTime));
-    },
-    setAuth() {
-      var cross = document.getElementById("cross");
-      if (cross.style.display === "none") {
-        console.log("block");
-        cross.style.display = "block";
-        this.useAuth = false;
-      } else {
-        cross.style.display = "none";
-        this.useAuth = true;
-      }
     },
     createPayload() {
       var jsonPayload = { data: { attributes: {}, type: "" } };

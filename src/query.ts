@@ -17,8 +17,8 @@ export class Query {
   data: any
   payload: any
   headers: any[]
-  includeAuth: boolean
-  token: string
+  useRemoteUrl: boolean
+  remoteUrl: string
   json: any
   error: string
   hasRawError: boolean
@@ -41,8 +41,8 @@ export class Query {
     this.filters = [{ name: null, operator: 'eq', error: null }]
     this.data = {}
     this.headers = []
-    this.includeAuth = false
-    this.token = ''
+    this.useRemoteUrl = false
+    this.remoteUrl = ''
     this.payload = {}
     this.url = null
     this.urlWithDomain = null
@@ -102,6 +102,10 @@ export class Query {
     let paramStr = parameterize(params)
     if (this.endpointIdParam) path = `${path}/${this.endpointIdParam}`
     if (paramStr.length > 0) path = `${path}?${paramStr}`
+    if (this.useRemoteUrl) {
+      const base = this.remoteUrl.split("/")
+      path = `${base[0]}//${base[2]}${path}`
+    }
     return path
   }
 
