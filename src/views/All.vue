@@ -1,15 +1,8 @@
 <template>
-  <div
-    class="vandal"
-    :class="{ creating, modalIsOpen }"
-  >
+  <div class="vandal" :class="{ creating, modalIsOpen }">
     <div class="overlay" />
 
-    <div
-      v-if="schema"
-      class="top-level-contents"
-      :class="{ resetting }"
-    >
+    <div v-if="schema" class="top-level-contents" :class="{ resetting }">
       <div class="row">
         <div class="col-3 left-rail card">
           <label>Server url</label>
@@ -20,40 +13,39 @@
                   v-for="host in remoteHosts"
                   :value="`${host.url}${host.schemaPath}`"
                   :key="host.name"
-                >{{ host.name }}</option>
+                >
+                  {{ host.name }}
+                </option>
               </select>
             </div>
             <a
               v-if="!useCustomUrl"
-              @click="useCustomUrl=!useCustomUrl"
-              style="color:orange; margin-left:1%;"
-            >Use remote Server</a>
+              @click="useCustomUrl = !useCustomUrl"
+              style="color: orange; margin-left: 1%"
+              >Use remote Server</a
+            >
             <a
               v-else
-              @click="useCustomUrl=!useCustomUrl"
-              style="color:orange; margin-left:1%;"
-            >Use default Server</a>
+              @click="useCustomUrl = !useCustomUrl"
+              style="color: orange; margin-left: 1%"
+              >Use default Server</a
+            >
           </div>
         </div>
         <div class="col-8 main card">
           <div class="row">
             <div class="column left">
-              <a
-                @click="addHeaderInput"
-                class="add"
-              >Add Header+</a>
+              <a @click="addHeaderInput" class="add">Add Header+</a>
             </div>
 
             <div class="column right">
-              <div
-                class="row full-width"
-                id="headerCard"
-              ></div>
+              <div class="row full-width" id="headerCard"></div>
               <a
                 v-if="headerCounter > 0"
                 @click="removeHeader"
-                style="color:red; font-weight:bold; margin-left:10px;"
-              >x</a>
+                style="color: red; font-weight: bold; margin-left: 10px"
+                >x</a
+              >
             </div>
           </div>
         </div>
@@ -67,10 +59,7 @@
               @toggle="toggleEndpoint"
             >
               <div class="submission clearfix">
-                <a
-                  class="reset"
-                  @click="reset(query.endpoint)"
-                >Reset</a>
+                <a class="reset" @click="reset(query.endpoint)">Reset</a>
                 <button
                   @click="fetch()"
                   type="submit"
@@ -95,11 +84,7 @@
         </div>
 
         <div class="col-9 main">
-          <url-bar
-            :schema="schema"
-            :query="query"
-            :firing="firing"
-          />
+          <url-bar :schema="schema" :query="query" :firing="firing" />
 
           <div :class="'request card ' + currentTab.name + ''">
             <transition name="request-card">
@@ -133,10 +118,7 @@
 
                 <div class="card-body">
                   <div v-if="currentTab.name == 'raw'">
-                    <pre
-                      v-highlightjs
-                      v-if="query.data.json"
-                    >
+                    <pre v-highlightjs v-if="query.data.json">
                       <code class="json">{{ query.data.json }}</code>
                     </pre>
                   </div>
@@ -154,25 +136,21 @@
                   </div>
                 </div>
               </div>
-              <div
-                class="is-not-ready"
-                v-else
-              >
+              <div class="is-not-ready" v-else>
                 Use the left side to configure and fire a request.
               </div>
             </transition>
 
             <div v-if="query && query.error">
-              <div
-                class="alert alert-danger"
-                role="alert"
-              >
+              <div class="alert alert-danger" role="alert">
                 {{ query.error }}
 
                 <div v-if="!query.hasRawError">
                   <br />
-                  <span class="text-muted">Server configured to hide additional debug
-                    information.</span>
+                  <span class="text-muted"
+                    >Server configured to hide additional debug
+                    information.</span
+                  >
                 </div>
               </div>
             </div>
@@ -183,23 +161,11 @@
     <div v-else>Loading...</div>
 
     <transition name="modal">
-      <div
-        v-if="modalIsOpen"
-        class="modal"
-        tabindex="-1"
-        role="dialog"
-      >
-        <div
-          class="modal-dialog"
-          role="document"
-        >
+      <div v-if="modalIsOpen" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <button
-                @click="onModalToggle()"
-                type="button"
-                class="close"
-              >
+              <button @click="onModalToggle()" type="button" class="close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -216,22 +182,22 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Schema } from "@/schema";
-import { Query } from "@/query";
-import ResourceForm from "@/components/ResourceForm.vue";
-import DataTable from "@/components/DataTable.vue";
-import EndpointList from "@/components/EndpointList.vue";
-import UrlBar from "@/components/UrlBar.vue";
-import EventBus from "@/event-bus.ts";
-import SecureLS from "secure-ls";
-import Vselect from "vue-select";
+import Vue from 'vue'
+import { Schema } from '@/schema'
+import { Query } from '@/query'
+import ResourceForm from '@/components/ResourceForm.vue'
+import DataTable from '@/components/DataTable.vue'
+import EndpointList from '@/components/EndpointList.vue'
+import UrlBar from '@/components/UrlBar.vue'
+import EventBus from '@/event-bus.ts'
+import SecureLS from 'secure-ls'
+import Vselect from 'vue-select'
 
-const ls = new SecureLS({ encodingType: "aes", isCompression: false });
-const tabs = [{ name: "results" }, { name: "raw" }, { name: "debug" }];
+const ls = new SecureLS({ encodingType: 'aes', isCompression: false })
+const tabs = [{ name: 'results' }, { name: 'raw' }, { name: 'debug' }]
 
 export default Vue.extend({
-  name: "vandal",
+  name: 'vandal',
   components: {
     EndpointList,
     DataTable,
@@ -257,124 +223,124 @@ export default Vue.extend({
       headers: [],
       serverUrl: null as string,
       remoteHosts: JSON,
-    };
+    }
   },
   created() {
     this.remoteHosts = JSON.parse(
       document
         .querySelector("meta[name='REMOTE_HOSTS']")
-        .getAttribute("content")
-    );
+        .getAttribute('content')
+    )
   },
   watch: {
     serverUrl() {
-      this.fetchSchema();
+      this.fetchSchema()
     },
     useCustomUrl() {
-      this.fetchSchema();
+      this.fetchSchema()
     },
   },
   mounted() {
-    this.fetchSchema();
+    this.fetchSchema()
     let doneCreating = () => {
-      this.creating = false;
-    };
-    setTimeout(doneCreating, 1000);
-    EventBus.$on("modalToggle", this.onModalToggle);
+      this.creating = false
+    }
+    setTimeout(doneCreating, 1000)
+    EventBus.$on('modalToggle', this.onModalToggle)
   },
   computed: {
     isShowAction(): any {
       if (this.query)
         return (
-          this.query.endpoint.includes("#show") ||
-          this.query.endpoint.includes("#index")
-        );
+          this.query.endpoint.includes('#show') ||
+          this.query.endpoint.includes('#index')
+        )
     },
     isCreateAction(): any {
-      if (this.query) return this.query.endpoint.includes("#create");
+      if (this.query) return this.query.endpoint.includes('#create')
     },
     isUpdateAction(): any {
-      if (this.query) return this.query.endpoint.includes("#update");
+      if (this.query) return this.query.endpoint.includes('#update')
     },
     isDestroyAction(): any {
-      if (this.query) return this.query.endpoint.includes("#destroy");
+      if (this.query) return this.query.endpoint.includes('#destroy')
     },
   },
   methods: {
     onModalToggle(content: string) {
-      this.modalContent = content;
-      this.modalIsOpen = !this.modalIsOpen;
+      this.modalContent = content
+      this.modalIsOpen = !this.modalIsOpen
     },
     toggleEndpoint(endpoint: string) {
       if (endpoint) {
-        this.resource = this.schema.resourceFor(endpoint);
-        this.reset(endpoint, false);
+        this.resource = this.schema.resourceFor(endpoint)
+        this.reset(endpoint, false)
       } else {
-        this.resource = null;
-        this.query = null;
+        this.resource = null
+        this.query = null
       }
     },
     async fetchSchema() {
-      let headers = new Headers();
-      headers.append("pragma", "no-cache");
-      headers.append("cache-control", "no-cache");
-      let init = { method: "GET", headers };
-      var schemaPath;
+      let headers = new Headers()
+      headers.append('pragma', 'no-cache')
+      headers.append('cache-control', 'no-cache')
+      let init = { method: 'GET', headers }
+      var schemaPath
       if (this.useCustomUrl && this.useCustomUrl) {
-        schemaPath = this.serverUrl;
-        headers.append("Access-Control-Allow-Origin", "*");
+        schemaPath = this.serverUrl
+        headers.append('Access-Control-Allow-Origin', '*')
       } else {
         schemaPath = document
           .querySelector("meta[name='schema']")
-          .getAttribute("content");
+          .getAttribute('content')
       }
-      let request = new Request(schemaPath);
-      let schemaJson = await (await fetch(request, init)).json();
-      this.schema = new Schema(schemaJson);
-      this.schema.useCustomUrl = this.useCustomUrl;
-      this.schema.remoteUrl = this.serverUrl;
-      this.schema._processRemoteResources();
-      return this.schema;
+      let request = new Request(schemaPath)
+      let schemaJson = await (await fetch(request, init)).json()
+      this.schema = new Schema(schemaJson)
+      this.schema.useCustomUrl = this.useCustomUrl
+      this.schema.remoteUrl = this.serverUrl
+      this.schema._processRemoteResources()
+      return this.schema
     },
     reset(endpoint: string, animate: boolean = true) {
-      if (animate) this.resetting = true;
-      this.query = new Query(this.schema, this.resource, endpoint);
+      if (animate) this.resetting = true
+      this.query = new Query(this.schema, this.resource, endpoint)
       if (this.useCustomUrl) {
-        this.query.useRemoteUrl = true;
-        this.query.remoteUrl = this.serverUrl;
+        this.query.useRemoteUrl = true
+        this.query.remoteUrl = this.serverUrl
       }
       let doReset = () => {
-        this.resetting = false;
-      };
-      if (animate) setTimeout(doReset, 100);
+        this.resetting = false
+      }
+      if (animate) setTimeout(doReset, 100)
     },
     async fetch() {
-      this.firing = true;
+      this.firing = true
       let unfire = () => {
-        this.firing = false;
-      };
-      setTimeout(unfire, 100);
-      this.isLoading = true;
-      let then = Date.now();
+        this.firing = false
+      }
+      setTimeout(unfire, 100)
+      this.isLoading = true
+      let then = Date.now()
       if (this.isShowAction) {
-        await this.query.fire();
+        await this.query.fire()
       } else if (this.isCreateAction) {
-        this.createPayload();
-        await this.query.create();
+        this.createPayload()
+        await this.query.create()
       } else if (this.isUpdateAction) {
-        this.createPayload();
+        this.createPayload()
         await this.query.update(
-          (document.getElementById("targetId") as HTMLInputElement).value
-        );
+          (document.getElementById('targetId') as HTMLInputElement).value
+        )
       } else {
         await this.query.destroy(
-          (document.getElementById("targetId") as HTMLInputElement).value
-        );
+          (document.getElementById('targetId') as HTMLInputElement).value
+        )
       }
-      let now = Date.now();
+      let now = Date.now()
       // Force min of 100ms
-      await this.stall(100 - (now - then));
-      this.isLoading = false;
+      await this.stall(100 - (now - then))
+      this.isLoading = false
     },
     validate() {
       // Object.keys(this.query.resource.filters).forEach((k) => {
@@ -385,96 +351,96 @@ export default Vue.extend({
       // })
       if (this.isShowAction) {
         let filter = this.query.filters.filter((f) => {
-          return f.name === "id";
-        })[0];
+          return f.name === 'id'
+        })[0]
         if (!filter.value) {
-          this["tempSet"](filter, "error", true, 1000);
-          return false;
+          this['tempSet'](filter, 'error', true, 1000)
+          return false
         } else {
-          filter.error = false;
-          return true;
+          filter.error = false
+          return true
         }
       } else {
-        return true;
+        return true
       }
     },
     tab(index: number) {
-      this.currentTab = tabs[index];
+      this.currentTab = tabs[index]
     },
     stall(stallTime = 3000) {
-      return new Promise((resolve) => setTimeout(resolve, stallTime));
+      return new Promise((resolve) => setTimeout(resolve, stallTime))
     },
     createPayload() {
-      var jsonPayload = { data: { attributes: {}, type: "" } };
-      const attributes = this.query.resource.attributes;
+      var jsonPayload = { data: { attributes: {}, type: '' } }
+      const attributes = this.query.resource.attributes
       for (let attribute in attributes) {
-        if (attribute == "id") {
-          continue;
+        if (attribute == 'id') {
+          continue
         }
         const fieldValue = (document.getElementById(
           attribute
-        ) as HTMLInputElement).value;
-        if (fieldValue != "") {
-          jsonPayload.data.attributes[attribute] = fieldValue;
+        ) as HTMLInputElement).value
+        if (fieldValue != '') {
+          jsonPayload.data.attributes[attribute] = fieldValue
         }
       }
-      jsonPayload.data.type = this.query.resource.type;
+      jsonPayload.data.type = this.query.resource.type
       if (this.isUpdateAction) {
-        jsonPayload.data["id"] = (document.getElementById(
-          "targetId"
-        ) as HTMLInputElement).value;
+        jsonPayload.data['id'] = (document.getElementById(
+          'targetId'
+        ) as HTMLInputElement).value
       }
-      this.query.payload = jsonPayload;
+      this.query.payload = jsonPayload
     },
     addHeaderInput() {
-      var card = document.getElementById("headerCard") as HTMLElement;
-      var child = document.createElement("div");
-      child.id = `header_${this.headerCounter}`;
-      const keyInput = document.createElement("input");
-      const valueInput = document.createElement("input");
-      const icon = document.createElement("i");
-      const cross = document.createElement("a");
+      var card = document.getElementById('headerCard') as HTMLElement
+      var child = document.createElement('div')
+      child.id = `header_${this.headerCounter}`
+      const keyInput = document.createElement('input')
+      const valueInput = document.createElement('input')
+      const icon = document.createElement('i')
+      const cross = document.createElement('a')
 
-      icon.className = "fas fa-tag";
+      icon.className = 'fas fa-tag'
       icon.setAttribute(
-        "style",
-        "color: orange; font-size: 20px; margin-right: 10px;"
-      );
-      keyInput.id = `${this.headerCounter}_headerKey`;
-      keyInput.type = "text";
-      keyInput.className = "keyInput";
+        'style',
+        'color: orange; font-size: 20px; margin-right: 10px;'
+      )
+      keyInput.id = `${this.headerCounter}_headerKey`
+      keyInput.type = 'text'
+      keyInput.className = 'keyInput'
 
-      valueInput.id = `${this.headerCounter}_headerValue`;
-      valueInput.type = "text";
+      valueInput.id = `${this.headerCounter}_headerValue`
+      valueInput.type = 'text'
 
       if (ls.get(keyInput.id)) {
-        keyInput.value = ls.get(keyInput.id);
-        valueInput.value = ls.get(valueInput.id);
+        keyInput.value = ls.get(keyInput.id)
+        valueInput.value = ls.get(valueInput.id)
       }
 
       child.setAttribute(
-        "style",
-        "width: 100%; margin-top: 5px; margin-bottom: 5px;"
-      );
+        'style',
+        'width: 100%; margin-top: 5px; margin-bottom: 5px;'
+      )
 
-      child.appendChild(icon);
-      child.appendChild(keyInput);
-      child.appendChild(valueInput);
-      child.appendChild(cross);
+      child.appendChild(icon)
+      child.appendChild(keyInput)
+      child.appendChild(valueInput)
+      child.appendChild(cross)
 
-      card.appendChild(child);
-      this.headerCounter++;
+      card.appendChild(child)
+      this.headerCounter++
     },
     removeHeader() {
-      this.headerCounter--;
+      this.headerCounter--
 
       const elementToRemove = document.getElementById(
         `header_${this.headerCounter}`
-      );
-      elementToRemove.remove();
+      )
+      elementToRemove.remove()
     },
   },
-});
+})
 </script>
 
 
@@ -747,26 +713,26 @@ pre {
     &.cs,
     &.javascript,
     &.json {
-      [class*="built_in"] {
+      [class*='built_in'] {
         color: lighten(#9ab4db, 5%);
       }
-      [class*="string"] {
+      [class*='string'] {
         color: lightgreen;
       }
-      [class*="attribute"] {
+      [class*='attribute'] {
         color: white;
       }
-      [class*="literal"] {
+      [class*='literal'] {
         color: lighten(red, 30%);
       }
-      [class*="c1"] {
+      [class*='c1'] {
         color: #b4b4b4;
       }
-      [class*="constant"] {
+      [class*='constant'] {
         color: #ffdf9d;
       }
-      [class*="nx"],
-      [class*="number"] {
+      [class*='nx'],
+      [class*='number'] {
         color: darken(#9ecbee, 5%);
       }
     }

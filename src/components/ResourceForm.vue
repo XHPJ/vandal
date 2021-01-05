@@ -1,29 +1,19 @@
 <template>
   <div class="resource-form">
-    <form
-      v-on:submit.prevent="$emit('submit')"
-      class="config"
-    >
+    <form v-on:submit.prevent="$emit('submit')" class="config">
       <button
         style="display: none"
         v-if="!isRelationship"
         type="hidden"
         class="btn btn-primary"
-      >Submit</button>
-
-      <div
-        class="query-inputs"
-        :class="{ hide: query.editingRelationship }"
       >
-        <div
-          v-if="isShowAction"
-          class="section filters first form-group"
-        >
+        Submit
+      </button>
+
+      <div class="query-inputs" :class="{ hide: query.editingRelationship }">
+        <div v-if="isShowAction" class="section filters first form-group">
           <label>Filters</label>
-          <a
-            @click="addFilter"
-            class="add"
-          >Add +</a>
+          <a @click="addFilter" class="add">Add +</a>
 
           <transition-group name="form-input-section">
             <div
@@ -37,10 +27,7 @@
                   v-model="filter.name"
                   class="filter-name col-8 float-left form-control"
                 >
-                  <option
-                    disabled
-                    value="null"
-                  >Choose</option>
+                  <option disabled value="null">Choose</option>
                   <option
                     v-for="(config, name) in query.resource.filters"
                     :key="name"
@@ -54,26 +41,24 @@
                   class="col-3 float-left form-control"
                 >
                   <option
-                    v-for="operator in query.resource.filters[filter.name].operators"
+                    v-for="operator in query.resource.filters[filter.name]
+                      .operators"
                     :key="operator"
                   >
                     {{ operator }}
                   </option>
                 </select>
-                <select
-                  v-else
-                  class="col-3 float-left form-control"
-                >
-                  <option
-                    selected
-                    disabled
-                  >eq</option>
+                <select v-else class="col-3 float-left form-control">
+                  <option selected disabled>eq</option>
                 </select>
               </div>
 
-              <div class='clearfix'>
+              <div class="clearfix">
                 <div
-                  v-if="filter.name && query.resource.filters[filter.name].type === 'boolean'"
+                  v-if="
+                    filter.name &&
+                    query.resource.filters[filter.name].type === 'boolean'
+                  "
                   class="boolean-toggle"
                 >
                   <input
@@ -90,15 +75,16 @@
                     data-on="on"
                   ></label>
                 </div>
-                <div v-else-if="filter.name && query.resource.filters[filter.name].allow">
+                <div
+                  v-else-if="
+                    filter.name && query.resource.filters[filter.name].allow
+                  "
+                >
                   <select
                     v-model="filter.value"
                     class="filter-value form-control col-10 float-left"
                   >
-                    <option
-                      disabled
-                      value="undefined"
-                    >Choose</option>
+                    <option disabled value="undefined">Choose</option>
                     <option
                       v-for="value in query.resource.filters[filter.name].allow"
                       :key="value"
@@ -107,7 +93,12 @@
                     </option>
                   </select>
                 </div>
-                <div v-else-if="filter.name && query.resource.filters[filter.name].type === 'date'">
+                <div
+                  v-else-if="
+                    filter.name &&
+                    query.resource.filters[filter.name].type === 'date'
+                  "
+                >
                   <input
                     v-model="filter.value"
                     type="text"
@@ -115,7 +106,12 @@
                     placeholder="M/D/YYYY"
                   />
                 </div>
-                <div v-else-if="filter.name && query.resource.filters[filter.name].type === 'datetime'">
+                <div
+                  v-else-if="
+                    filter.name &&
+                    query.resource.filters[filter.name].type === 'datetime'
+                  "
+                >
                   <input
                     v-model="filter.value"
                     type="text"
@@ -131,46 +127,31 @@
                     placeholder="Enter Filter Value Here"
                   />
                 </div>
-                <a
-                  @click="removeFilter(filter)"
-                  class='remove col-1'
-                >x</a>
+                <a @click="removeFilter(filter)" class="remove col-1">x</a>
               </div>
 
-              <div
-                class="required-filter text-muted"
-                v-if="filter.required"
-              >
+              <div class="required-filter text-muted" v-if="filter.required">
                 Required
               </div>
             </div>
           </transition-group>
         </div>
 
-        <div
-          v-if="isShowAction"
-          class="section sorts form-group"
-        >
+        <div v-if="isShowAction" class="section sorts form-group">
           <label>Sorts</label>
-          <a
-            @click="addSort"
-            class="add"
-          >Add +</a>
+          <a @click="addSort" class="add">Add +</a>
 
           <transition-group name="form-input-section">
             <div
               v-for="(sort, index) in query.sorts"
               :key="index"
-              class='form-group clearfix'
+              class="form-group clearfix"
             >
               <select
                 v-model="sort.name"
                 class="filter-name col-7 float-left form-control"
               >
-                <option
-                  disabled
-                  value="null"
-                >Choose</option>
+                <option disabled value="null">Choose</option>
                 <option
                   v-for="(config, name) in query.resource.sorts"
                   :key="name"
@@ -178,25 +159,16 @@
                   {{ name }}
                 </option>
               </select>
-              <select
-                v-model="sort.dir"
-                class="col-3 float-left form-control"
-              >
+              <select v-model="sort.dir" class="col-3 float-left form-control">
                 <option selected>asc</option>
                 <option>desc</option>
               </select>
-              <a
-                @click="removeSort(sort)"
-                class='remove col-1'
-              >x</a>
+              <a @click="removeSort(sort)" class="remove col-1">x</a>
             </div>
           </transition-group>
         </div>
 
-        <div
-          v-if="isShowAction"
-          class="section form-pagination form-group"
-        >
+        <div v-if="isShowAction" class="section form-pagination form-group">
           <label>Pagination</label>
 
           <div
@@ -215,15 +187,9 @@
               class="col-5 float-left size form-control"
               placeholder="Size"
             />
-            <a
-              @click="removePagination()"
-              class='remove col-1'
-            >x</a>
+            <a @click="removePagination()" class="remove col-1">x</a>
           </div>
-          <div
-            v-else
-            class="form-group clearfix text-muted"
-          >
+          <div v-else class="form-group clearfix text-muted">
             Only #show supports nested pagination
           </div>
         </div>
@@ -232,27 +198,40 @@
       <div
         v-if="isShowAction"
         class="relationships section form-group"
-        :class="{ 'editing-subrelationship': query.editingRelationship, nested: (query.editingRelationship && isRelationship), 'active-subrelationship': isActiveSubrelationship, 'inactive-subrelationship': !isActiveSubrelationship, ['depth-'+depth]: true }"
+        :class="{
+          'editing-subrelationship': query.editingRelationship,
+          nested: query.editingRelationship && isRelationship,
+          'active-subrelationship': isActiveSubrelationship,
+          'inactive-subrelationship': !isActiveSubrelationship,
+          ['depth-' + depth]: true,
+        }"
       >
-        <label v-if="!(query.editingRelationship && isRelationship)">Relationships</label>
+        <label v-if="!(query.editingRelationship && isRelationship)"
+          >Relationships</label
+        >
 
         <div
           v-for="(config, name) in query.possibleRelationships"
           :key="name"
           class="relationship clearfix"
-          :class="{ ['depth-'+depth]: true, selected: query.relationships[name], hide: (query.editingRelationship && query.editingRelationship != query.relationships[name]) }"
+          :class="{
+            ['depth-' + depth]: true,
+            selected: query.relationships[name],
+            hide:
+              query.editingRelationship &&
+              query.editingRelationship != query.relationships[name],
+          }"
         >
-          <a
-            class='toggle clearfix'
-            @click="toggleRelationship(name, config)"
-          >
-            <div class="float-left name">{{name}}</div>
+          <a class="toggle clearfix" @click="toggleRelationship(name, config)">
+            <div class="float-left name">{{ name }}</div>
 
             <span v-if="isActiveSubrelationship">
               <div
                 v-if="query.relationships[name]"
                 class="badge badge-pill badge-info"
-              >&#x2713;</div>
+              >
+                &#x2713;
+              </div>
             </span>
           </a>
 
@@ -260,17 +239,17 @@
             v-if="query.relationships[name]"
             @click="removeRelationship(name)"
             class="remove-field"
-          >Remove</a>
+            >Remove</a
+          >
         </div>
       </div>
 
-      <div
-        v-for="(config, name) in query.relationships"
-        :key="name"
-      >
+      <div v-for="(config, name) in query.relationships" :key="name">
         <div
           v-if="query.relationships[name]"
-          :class="{ hidden: query.editingRelationship != query.relationships[name] }"
+          :class="{
+            hidden: query.editingRelationship != query.relationships[name],
+          }"
         >
           <resource-form
             :query="query.relationships[name]"
@@ -279,28 +258,16 @@
             @editRelationship="onSubrelationshipEdit"
             @doneEditRelationship="onSubrelationshipDoneEdit"
             :isShowAction="isShowAction"
-            :depth="depth+1"
+            :depth="depth + 1"
           />
         </div>
       </div>
 
       <a class="toggle clearfix">
-        <div
-          style="margin-top: 5%;"
-          v-if="isUpdateAction || isDestroyAction"
-        >
-          <span
-            v-if="isUpdateAction"
-            style="float: left;"
-          >ID to update</span>
-          <span
-            v-else
-            style="float: left;"
-          >ID to delete</span>
-          <span><input
-              style="float: right;"
-              id="targetId"
-            /></span>
+        <div style="margin-top: 5%" v-if="isUpdateAction || isDestroyAction">
+          <span v-if="isUpdateAction" style="float: left">ID to update</span>
+          <span v-else style="float: left">ID to delete</span>
+          <span><input style="float: right" id="targetId" /></span>
         </div>
       </a>
 
@@ -318,152 +285,141 @@
           class="field clearfix"
           :class="{ selected: query.fields[name] }"
         >
-          <a
-            @click="toggleField(name, config)"
-            class="toggle clearfix"
-          >
+          <a @click="toggleField(name, config)" class="toggle clearfix">
             <div v-if="isCreateAction || isUpdateAction">
-              <span>{{name}}</span>
-              <span><input
-                  style="float: right;"
-                  :id="name"
-                /></span>
+              <span>{{ name }}</span>
+              <span><input style="float: right" :id="name" /></span>
             </div>
             <div v-else-if="isShowAction">
-              <span class="name">{{name}}</span>
+              <span class="name">{{ name }}</span>
               <span
                 v-if="query.fields[name]"
                 class="badge badge-pill badge-info"
-              >&#x2713;</span>
+                >&#x2713;</span
+              >
             </div>
           </a>
         </div>
       </div>
-
     </form>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Query } from "@/query";
+import Vue from 'vue'
+import { Query } from '@/query'
 
 export default Vue.extend({
-  name: "resource-form",
+  name: 'resource-form',
   props: [
-    "query",
-    "isShowAction",
-    "isCreateAction",
-    "isUpdateAction",
-    "isDestroyAction",
-    "isRelationship",
-    "schema",
-    "depth",
+    'query',
+    'isShowAction',
+    'isCreateAction',
+    'isUpdateAction',
+    'isDestroyAction',
+    'isRelationship',
+    'schema',
+    'depth',
   ],
   data() {
     return {
       subRelationshipNames: [] as string[],
       isActiveSubrelationship: false as boolean,
       payload: null as string,
-    };
+    }
   },
   computed: {},
   methods: {
     addFilter() {
-      this.query.filters.push({ name: null, operator: "eq", error: null });
+      this.query.filters.push({ name: null, operator: 'eq', error: null })
     },
     removeFilter(filter: any) {
       if (filter.required) {
-        filter.value = null;
+        filter.value = null
       } else {
-        let index = this.query.filters.indexOf(filter);
-        this.query.filters.splice(index, 1);
+        let index = this.query.filters.indexOf(filter)
+        this.query.filters.splice(index, 1)
         if (this.query.filters.length < 1) {
-          this.addFilter();
+          this.addFilter()
         }
       }
     },
     addSort() {
-      this.query.sorts.push({ name: null, dir: "asc", delete: false });
+      this.query.sorts.push({ name: null, dir: 'asc', delete: false })
     },
     removeSort(sort: any) {
-      let index = this.query.sorts.indexOf(sort);
-      this.query.sorts.splice(index, 1);
+      let index = this.query.sorts.indexOf(sort)
+      this.query.sorts.splice(index, 1)
       if (this.query.sorts.length === 0) {
-        this.addSort();
+        this.addSort()
       }
     },
     removePagination() {
-      this.query.page = { number: null, size: null };
+      this.query.page = { number: null, size: null }
     },
     selectRelationship(name: string, config: any) {
-      let subResource = this.schema.getResource(config.resource);
+      let subResource = this.schema.getResource(config.resource)
 
       // NB: doesn't support fields yet b/c ?fields[type] - dont know type
-      if (config.type === "polymorphic_belongs_to") {
-        let relationships = {};
+      if (config.type === 'polymorphic_belongs_to') {
+        let relationships = {}
         config.resources.forEach((r: any) => {
-          let resource = this.schema.getResource(r);
-          Object.assign(relationships, resource.relationships);
-        });
+          let resource = this.schema.getResource(r)
+          Object.assign(relationships, resource.relationships)
+        })
         subResource = {
           polymorphic: true,
           children: config.resources,
           relationships,
-        };
+        }
       }
-      let relationshipPath = name;
+      let relationshipPath = name
       if (this.query.relationshipPath) {
-        relationshipPath = `${this.query.relationshipPath}.${name}`;
+        relationshipPath = `${this.query.relationshipPath}.${name}`
       }
-      let subQuery = new Query(
-        this.schema,
-        subResource,
-        null,
-        relationshipPath
-      );
-      this.$set(this.query.relationships, name, subQuery);
+      let subQuery = new Query(this.schema, subResource, null, relationshipPath)
+      this.$set(this.query.relationships, name, subQuery)
     },
     removeRelationship(name: string) {
-      this.$delete(this.query.relationships, name);
-      this.doneEditingRelationship(name);
+      this.$delete(this.query.relationships, name)
+      this.doneEditingRelationship(name)
     },
     toggleRelationship(name: string, config: any) {
       if (this.query.editingRelationship) {
-        this.doneEditingRelationship(name);
+        this.doneEditingRelationship(name)
       } else if (this.query.relationships[name]) {
-        this.editRelationship(name, this.query.relationships[name]);
+        this.editRelationship(name, this.query.relationships[name])
       } else {
-        this.selectRelationship(name, config);
+        this.selectRelationship(name, config)
       }
     },
     editRelationship(name: string, subQuery: any) {
-      this.$emit("editRelationship", name);
-      this.query.editingRelationship = subQuery;
-      this.isActiveSubrelationship = true;
+      this.$emit('editRelationship', name)
+      this.query.editingRelationship = subQuery
+      this.isActiveSubrelationship = true
     },
     doneEditingRelationship(name: string) {
-      this.query.editingRelationship = false;
-      this.isActiveSubrelationship = false;
-      this.$emit("doneEditRelationship", name);
+      this.query.editingRelationship = false
+      this.isActiveSubrelationship = false
+      this.$emit('doneEditRelationship', name)
     },
     toggleField(name: string) {
       if (this.isShowAction) {
         if (this.query.fields[name]) {
-          this.$delete(this.query.fields, name);
+          this.$delete(this.query.fields, name)
         } else {
-          this.$set(this.query.fields, name, true);
+          this.$set(this.query.fields, name, true)
         }
       }
     },
     onSubrelationshipEdit(name: string) {
-      this.isActiveSubrelationship = false;
+      this.isActiveSubrelationship = false
     },
     onSubrelationshipDoneEdit(name: string) {
-      this.isActiveSubrelationship = true;
+      this.isActiveSubrelationship = true
     },
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>
@@ -770,7 +726,7 @@ $warning: lighten(yellow, 20%);
     cursor: pointer;
   }
   .checkbox-label:before {
-    content: "";
+    content: '';
     display: block;
     position: absolute;
     z-index: 1;

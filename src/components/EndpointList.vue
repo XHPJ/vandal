@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="endpoints"
-    :class="{ 'has-selection': selection }"
-  >
+  <div class="endpoints" :class="{ 'has-selection': selection }">
     <input
       v-model="query"
       type="search"
@@ -16,10 +13,7 @@
       class="endpoint"
       :class="{ selected: selection === e }"
     >
-      <div
-        class="path"
-        @click="toggle(e)"
-      >
+      <div class="path" @click="toggle(e)">
         <span v-if="selection === e">&laquo;&nbsp;</span>
         {{ e | endpointDisplay }}
       </div>
@@ -32,49 +26,49 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import Vue from 'vue'
 
 export default Vue.extend({
-  name: "endpoint-list",
-  props: ["endpoints"],
+  name: 'endpoint-list',
+  props: ['endpoints'],
   data() {
     return {
       selection: null as any,
       query: null as string | null,
-    };
+    }
   },
   filters: {
     endpointDisplay: function (endpoint: string) {
-      let split = endpoint.split("/");
-      return split[split.length - 1];
+      let split = endpoint.split('/')
+      return split[split.length - 1]
     },
   },
   computed: {
     filteredEndpoints(): string[] {
       let filtered = this.endpoints.filter((e: string) => {
-        return e;
-      });
+        return e
+      })
 
       if (this.query) {
         return filtered.filter((e: string) => {
-          return e.includes(this.query);
-        });
+          return e.includes(this.query)
+        })
       } else {
-        return filtered;
+        return filtered
       }
     },
   },
   methods: {
     toggle(endpoint: string) {
       if (this.selection) {
-        this.selection = null;
+        this.selection = null
       } else {
-        this.selection = endpoint;
+        this.selection = endpoint
       }
-      this.$emit("toggle", this.selection);
+      this.$emit('toggle', this.selection)
     },
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>
