@@ -2,55 +2,55 @@
   <div class="vandal" :class="{ creating, modalIsOpen }">
     <div class="overlay" />
 
-    <div v-if="schema" class="top-level-contents" :class="{ resetting }">
-      <div class="row">
-        <div class="col-3 left-rail card">
-          <label>Server url</label>
-          <div>
-            <div v-if="useCustomUrl">
-              <select v-model="serverUrl">
-                <option
-                  v-for="host in remoteHosts"
-                  :value="`${host.url}${host.schemaPath}`"
-                  :key="host.name"
-                >
-                  {{ host.name }}
-                </option>
-              </select>
-            </div>
-            <a
-              v-if="!useCustomUrl"
-              @click="useCustomUrl = !useCustomUrl"
-              style="color: orange; margin-left: 1%"
-              >Use remote Server</a
-            >
-            <a
-              v-else
-              @click="useCustomUrl = !useCustomUrl"
-              style="color: orange; margin-left: 1%"
-              >Use default Server</a
-            >
-          </div>
-        </div>
-        <div class="col-8 main card">
-          <div class="row">
-            <div class="column left">
-              <a @click="addHeaderInput" class="add">Add Header+</a>
-            </div>
-
-            <div class="column right">
-              <div class="row full-width" id="headerCard"></div>
-              <a
-                v-if="headerCounter > 0"
-                @click="removeHeader"
-                style="color: red; font-weight: bold; margin-left: 10px"
-                >x</a
+    <div class="row">
+      <div class="col-3 left-rail card">
+        <label>Server url</label>
+        <div>
+          <div v-if="useCustomUrl">
+            <select v-model="serverUrl">
+              <option
+                v-for="host in remoteHosts"
+                :value="`${host.url}${host.schemaPath}`"
+                :key="host.name"
               >
-            </div>
+                {{ host.name }}
+              </option>
+            </select>
+          </div>
+          <a
+            v-if="!useCustomUrl"
+            @click="useCustomUrl = !useCustomUrl"
+            style="color: orange; margin-left: 1%"
+            >Use remote Server</a
+          >
+          <a
+            v-else
+            @click="useCustomUrl = !useCustomUrl"
+            style="color: orange; margin-left: 1%"
+            >Use default Server</a
+          >
+        </div>
+      </div>
+      <div class="col-8 main card">
+        <div class="row">
+          <div class="column left">
+            <a @click="addHeaderInput" class="add">Add Header+</a>
+          </div>
+
+          <div class="column right">
+            <div class="row full-width" id="headerCard"></div>
+            <a
+              v-if="headerCounter > 0"
+              @click="removeHeader"
+              style="color: red; font-weight: bold; margin-left: 10px"
+              >x</a
+            >
           </div>
         </div>
       </div>
+    </div>
 
+    <div v-if="schema" class="top-level-contents" :class="{ resetting }">
       <div class="row">
         <div class="col-3 left-rail">
           <div class="card">
