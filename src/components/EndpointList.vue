@@ -7,7 +7,12 @@
       placeholder="Search"
     />
 
-    <a v-for="e in filteredEndpoints" :key="e" class="endpoint" :class="{ selected: selection === e }">
+    <a
+      v-for="e in filteredEndpoints"
+      :key="e"
+      class="endpoint"
+      :class="{ selected: selection === e }"
+    >
       <div class="path" @click="toggle(e)">
         <span v-if="selection === e">&laquo;&nbsp;</span>
         {{ e | endpointDisplay }}
@@ -21,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import Vue from 'vue'
 
 export default Vue.extend({
   name: 'endpoint-list',
@@ -29,20 +34,19 @@ export default Vue.extend({
   data() {
     return {
       selection: null as any,
-      query: null as string | null
+      query: null as string | null,
     }
   },
   filters: {
     endpointDisplay: function (endpoint: string) {
       let split = endpoint.split('/')
-      return split[split.length-1]
-    }
+      return split[split.length - 1]
+    },
   },
   computed: {
-    filteredEndpoints() : string[] {
+    filteredEndpoints(): string[] {
       let filtered = this.endpoints.filter((e: string) => {
-        // only reads for now
-        return e.includes('#index') || e.includes('#show')
+        return e
       })
 
       if (this.query) {
@@ -62,9 +66,9 @@ export default Vue.extend({
         this.selection = endpoint
       }
       this.$emit('toggle', this.selection)
-    }
-  }
-});
+    },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
