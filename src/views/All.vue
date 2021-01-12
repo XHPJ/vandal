@@ -19,13 +19,13 @@
           </div>
           <a
             v-if="!useCustomUrl"
-            @click="useCustomUrl = !useCustomUrl"
+            @click="useRemoteServer"
             style="color: orange; margin-left: 1%"
             >Use remote Server</a
           >
           <a
             v-else
-            @click="useCustomUrl = !useCustomUrl"
+            @click="useDefaultServer"
             style="color: orange; margin-left: 1%"
             >Use default Server</a
           >
@@ -56,6 +56,7 @@
           <div class="card">
             <endpoint-list
               :endpoints="schema.endpoints"
+              :bus="bus"
               @toggle="toggleEndpoint"
             >
               <div class="submission clearfix">
@@ -191,7 +192,6 @@ import EndpointList from '@/components/EndpointList.vue'
 import UrlBar from '@/components/UrlBar.vue'
 import EventBus from '@/event-bus.ts'
 import SecureLS from 'secure-ls'
-import Vselect from 'vue-select'
 
 const ls = new SecureLS({ encodingType: 'aes', isCompression: false })
 const tabs = [{ name: 'results' }, { name: 'raw' }, { name: 'debug' }]
@@ -203,7 +203,6 @@ export default Vue.extend({
     DataTable,
     ResourceForm,
     UrlBar,
-    Vselect,
   },
   data() {
     return {
@@ -223,6 +222,7 @@ export default Vue.extend({
       headers: [],
       serverUrl: null as string,
       remoteHosts: JSON,
+      bus: new Vue(),
     }
   },
   created() {
@@ -234,6 +234,8 @@ export default Vue.extend({
   },
   watch: {
     serverUrl() {
+      this.toggleEndpoint(null)
+      this.bus.$emit('resetEndpoints')
       this.fetchSchema()
     },
     useCustomUrl() {
@@ -286,7 +288,7 @@ export default Vue.extend({
       headers.append('cache-control', 'no-cache')
       let init = { method: 'GET', headers }
       var schemaPath
-      if (this.useCustomUrl && this.useCustomUrl) {
+      if (this.useCustomUrl) {
         schemaPath = this.serverUrl
         headers.append('Access-Control-Allow-Origin', '*')
       } else {
@@ -438,6 +440,13 @@ export default Vue.extend({
         `header_${this.headerCounter}`
       )
       elementToRemove.remove()
+    },
+    useDefaultServer() {
+      this.useCustomUrl = !this.useCustomUrl
+      location.reload()
+    },
+    useRemoteServer() {
+      this.useCustomUrl = !this.useCustomUrl
     },
   },
 })

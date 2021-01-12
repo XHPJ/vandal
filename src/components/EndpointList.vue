@@ -30,7 +30,7 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'endpoint-list',
-  props: ['endpoints'],
+  props: ['endpoints', 'bus'],
   data() {
     return {
       selection: null as any,
@@ -58,6 +58,9 @@ export default Vue.extend({
       }
     },
   },
+  mounted() {
+    this.bus.$on('resetEndpoints', this.resetSelection)
+  },
   methods: {
     toggle(endpoint: string) {
       if (this.selection) {
@@ -66,6 +69,9 @@ export default Vue.extend({
         this.selection = endpoint
       }
       this.$emit('toggle', this.selection)
+    },
+    resetSelection() {
+      this.selection = null
     },
   },
 })
