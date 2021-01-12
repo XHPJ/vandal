@@ -19,13 +19,16 @@
           </div>
           <a
             v-if="!useCustomUrl"
-            @click="useRemoteServer"
+            @click="useCustomUrl = !useCustomUrl"
             style="color: orange; margin-left: 1%"
             >Use remote Server</a
           >
           <a
             v-else
-            @click="useDefaultServer"
+            @click="
+              useCustomUrl = !useCustomUrl
+              schema = null
+            "
             style="color: orange; margin-left: 1%"
             >Use default Server</a
           >
@@ -235,7 +238,7 @@ export default Vue.extend({
   watch: {
     serverUrl() {
       this.toggleEndpoint(null)
-      this.bus.$emit('resetEndpoints')
+      EventBus.$emit('resetEndpoints')
       this.fetchSchema()
     },
     useCustomUrl() {
@@ -444,9 +447,6 @@ export default Vue.extend({
     useDefaultServer() {
       this.useCustomUrl = !this.useCustomUrl
       location.reload()
-    },
-    useRemoteServer() {
-      this.useCustomUrl = !this.useCustomUrl
     },
   },
 })
