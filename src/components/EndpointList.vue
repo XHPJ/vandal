@@ -27,6 +27,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import EventBus from '@/event-bus.ts'
 
 export default Vue.extend({
   name: 'endpoint-list',
@@ -58,6 +59,9 @@ export default Vue.extend({
       }
     },
   },
+  mounted() {
+    EventBus.$on('resetEndpoints', this.resetSelection)
+  },
   methods: {
     toggle(endpoint: string) {
       if (this.selection) {
@@ -66,6 +70,9 @@ export default Vue.extend({
         this.selection = endpoint
       }
       this.$emit('toggle', this.selection)
+    },
+    resetSelection() {
+      this.selection = null
     },
   },
 })

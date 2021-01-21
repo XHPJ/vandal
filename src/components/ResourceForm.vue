@@ -267,7 +267,7 @@
         <div style="margin-top: 5%" v-if="isUpdateAction || isDestroyAction">
           <span v-if="isUpdateAction" style="float: left">ID to update</span>
           <span v-else style="float: left">ID to delete</span>
-          <span><input style="float: right" id="targetId" /></span>
+          <span><input class="form-control" style="float: right" id="targetId" /></span>
         </div>
       </a>
 
@@ -288,15 +288,14 @@
           <a @click="toggleField(name, config)" class="toggle clearfix">
             <div v-if="isCreateAction || isUpdateAction">
               <span>{{ name }}</span>
-              <span><input style="float: right" :id="name" /></span>
+              <span><input class="form-control" style="float: right" :id="name" /></span>
             </div>
             <div v-else-if="isShowAction">
               <span class="name">{{ name }}</span>
               <span
                 v-if="query.fields[name]"
                 class="badge badge-pill badge-info"
-                >&#x2713;</span
-              >
+                >&#x2713;</span>
             </div>
           </a>
         </div>

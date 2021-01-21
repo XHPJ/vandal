@@ -1,11 +1,18 @@
 <template>
   <div class="vandal" :class="{ creating, modalIsOpen }">
     <div class="overlay" />
-
     <div class="row">
-      <div class="col-3 left-rail card">
-        <label>Server url</label>
-        <div>
+      <div class="col-3 card left-rail">
+        <Collapsible :isOpen="false">
+        <div slot="trigger">
+            <h7>Remote Server -</h7>
+        </div>
+        <div slot="closedTrigger">
+            <h7>Remote Server +</h7>
+        </div>
+        <div class="card-body">
+          <a>Server url</a> 
+          <br>
           <div v-if="useCustomUrl">
             <select v-model="serverUrl">
               <option
@@ -25,13 +32,23 @@
           >
           <a
             v-else
-            @click="useCustomUrl = !useCustomUrl"
+            @click="
+              useCustomUrl = !useCustomUrl
+              schema = null
+            "
             style="color: orange; margin-left: 1%"
-            >Use default Server</a
-          >
+            >Use default Server</a>
         </div>
+      </Collapsible>
       </div>
-      <div class="col-8 main card">
+      <div class="col-8 card">
+        <Collapsible :isOpen="false">
+        <div slot="trigger">
+            <p>Custom Header -</p>
+        </div>
+        <div slot="closedTrigger">
+            <p>Custom Header +</p>
+        </div>
         <div class="row">
           <div class="column left">
             <a @click="addHeaderInput" class="add">Add Header+</a>
@@ -47,6 +64,7 @@
             >
           </div>
         </div>
+        </Collapsible>
       </div>
     </div>
 
@@ -56,6 +74,7 @@
           <div class="card">
             <endpoint-list
               :endpoints="schema.endpoints"
+              :bus="bus"
               @toggle="toggleEndpoint"
             >
               <div class="submission clearfix">
@@ -191,7 +210,8 @@ import EndpointList from '@/components/EndpointList.vue'
 import UrlBar from '@/components/UrlBar.vue'
 import EventBus from '@/event-bus.ts'
 import SecureLS from 'secure-ls'
-import Vselect from 'vue-select'
+import Collapsible from 'vue-collapsible-component';
+import 'vue-collapsible-component/lib/vue-collapsible.css';
 
 const ls = new SecureLS({ encodingType: 'aes', isCompression: false })
 const tabs = [{ name: 'results' }, { name: 'raw' }, { name: 'debug' }]
@@ -203,7 +223,7 @@ export default Vue.extend({
     DataTable,
     ResourceForm,
     UrlBar,
-    Vselect,
+    Collapsible
   },
   data() {
     return {
@@ -223,6 +243,8 @@ export default Vue.extend({
       headers: [],
       serverUrl: null as string,
       remoteHosts: JSON,
+      showHeader: false as boolean,
+      showServerUrl: false as boolean
     }
   },
   created() {
@@ -234,6 +256,8 @@ export default Vue.extend({
   },
   watch: {
     serverUrl() {
+      this.toggleEndpoint(null)
+      EventBus.$emit('resetEndpoints')
       this.fetchSchema()
     },
     useCustomUrl() {
@@ -286,7 +310,7 @@ export default Vue.extend({
       headers.append('cache-control', 'no-cache')
       let init = { method: 'GET', headers }
       var schemaPath
-      if (this.useCustomUrl && this.useCustomUrl) {
+      if (this.useCustomUrl) {
         schemaPath = this.serverUrl
         headers.append('Access-Control-Allow-Origin', '*')
       } else {
@@ -396,22 +420,24 @@ export default Vue.extend({
       var card = document.getElementById('headerCard') as HTMLElement
       var child = document.createElement('div')
       child.id = `header_${this.headerCounter}`
+      child.className = 'row'
+
       const keyInput = document.createElement('input')
       const valueInput = document.createElement('input')
       const icon = document.createElement('i')
-      const cross = document.createElement('a')
 
-      icon.className = 'fas fa-tag'
+      icon.className = 'fas fa-tag col-1'
       icon.setAttribute(
         'style',
-        'color: orange; font-size: 20px; margin-right: 10px;'
+        'color: orange; font-size: 20px; margin-top: 10px;'
       )
       keyInput.id = `${this.headerCounter}_headerKey`
       keyInput.type = 'text'
-      keyInput.className = 'keyInput'
+      keyInput.className = 'keyInput form-control col'
 
       valueInput.id = `${this.headerCounter}_headerValue`
       valueInput.type = 'text'
+      valueInput.className = 'form-control col'
 
       if (ls.get(keyInput.id)) {
         keyInput.value = ls.get(keyInput.id)
@@ -420,13 +446,12 @@ export default Vue.extend({
 
       child.setAttribute(
         'style',
-        'width: 100%; margin-top: 5px; margin-bottom: 5px;'
+        'width: 100%; margin-top: 1%;'
       )
 
       child.appendChild(icon)
       child.appendChild(keyInput)
       child.appendChild(valueInput)
-      child.appendChild(cross)
 
       card.appendChild(child)
       this.headerCounter++
@@ -439,6 +464,20 @@ export default Vue.extend({
       )
       elementToRemove.remove()
     },
+    useDefaultServer() {
+      this.useCustomUrl = !this.useCustomUrl
+      location.reload()
+    },
+    collpase(id: string) {
+      var content = document.getElementById(id)
+      let contentHeadline = document.getElementById(`${id}-head`)
+      contentHeadline.classList.toggle('active')
+      if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      } else {
+        content.style.removeProperty('max-height');
+      } 
+    }
   },
 })
 </script>
