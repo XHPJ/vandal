@@ -1,69 +1,104 @@
 <template>
   <div class="vandal" :class="{ creating, modalIsOpen }">
     <div class="overlay" />
-    <div class="row">
-      <div class="col-3 card left-rail">
+    <div
+      class="row"
+      v-if="enableCustomHeader == true || enableRemoteServerAccess == true"
+    >
+      <div class="col-3 card left-rail" v-if="enableRemoteServerAccess == true">
         <Collapsible :isOpen="false">
-        <div slot="trigger">
+          <div slot="trigger">
             <h7>Remote Server -</h7>
-        </div>
-        <div slot="closedTrigger">
+          </div>
+          <div slot="closedTrigger">
             <h7>Remote Server +</h7>
-        </div>
-        <div class="card-body">
-          <a>Server url</a> 
-          <br>
-          <div v-if="useCustomUrl">
-            <select v-model="serverUrl">
-              <option
-                v-for="host in remoteHosts"
-                :value="`${host.url}${host.schemaPath}`"
-                :key="host.name"
-              >
-                {{ host.name }}
-              </option>
-            </select>
           </div>
-          <a
-            v-if="!useCustomUrl"
-            @click="useCustomUrl = !useCustomUrl"
-            style="color: orange; margin-left: 1%"
-            >Use remote Server</a
-          >
-          <a
-            v-else
-            @click="
-              useCustomUrl = !useCustomUrl
-              schema = null
-            "
-            style="color: orange; margin-left: 1%"
-            >Use default Server</a>
-        </div>
-      </Collapsible>
-      </div>
-      <div class="col-8 card">
-        <Collapsible :isOpen="false">
-        <div slot="trigger">
-            <p>Custom Header -</p>
-        </div>
-        <div slot="closedTrigger">
-            <p>Custom Header +</p>
-        </div>
-        <div class="row">
-          <div class="column left">
-            <a @click="addHeaderInput" class="add">Add Header+</a>
-          </div>
-
-          <div class="column right">
-            <div class="row full-width" id="headerCard"></div>
+          <div class="card-body">
+            <a>Server url</a>
+            <br />
+            <div v-if="useCustomUrl">
+              <select v-model="serverUrl">
+                <option
+                  v-for="host in remoteHosts"
+                  :value="`${host.url}${host.schemaPath}`"
+                  :key="host.name"
+                >
+                  {{ host.name }}
+                </option>
+              </select>
+            </div>
             <a
-              v-if="headerCounter > 0"
-              @click="removeHeader"
-              style="color: red; font-weight: bold; margin-left: 10px"
-              >x</a
+              v-if="!useCustomUrl"
+              @click="useCustomUrl = !useCustomUrl"
+              style="color: orange; margin-left: 1%"
+              >Use remote Server</a
+            >
+            <a
+              v-else
+              @click="
+                useCustomUrl = !useCustomUrl
+                schema = null
+              "
+              style="color: orange; margin-left: 1%"
+              >Use default Server</a
             >
           </div>
-        </div>
+        </Collapsible>
+      </div>
+      <div
+        class="col-8 card"
+        v-if="enableCustomHeader == true && enableRemoteServerAccess == true"
+      >
+        <Collapsible :isOpen="false">
+          <div slot="trigger">
+            <p>Custom Header -</p>
+          </div>
+          <div slot="closedTrigger">
+            <p>Custom Header +</p>
+          </div>
+          <div class="row">
+            <div class="column left">
+              <a @click="addHeaderInput" class="add">Add Header+</a>
+            </div>
+
+            <div class="column right">
+              <div class="row full-width" id="headerCard"></div>
+              <a
+                v-if="headerCounter > 0"
+                @click="removeHeader"
+                style="color: red; font-weight: bold; margin-left: 10px"
+                >x</a
+              >
+            </div>
+          </div>
+        </Collapsible>
+      </div>
+      <div
+        class="col-12 card"
+        v-if="enableCustomHeader == true && !enableRemoteServerAccess"
+      >
+        <Collapsible :isOpen="false">
+          <div slot="trigger">
+            <p>Custom Header -</p>
+          </div>
+          <div slot="closedTrigger">
+            <p>Custom Header +</p>
+          </div>
+          <div class="row">
+            <div class="column left">
+              <a @click="addHeaderInput" class="add">Add Header+</a>
+            </div>
+
+            <div class="column right">
+              <div class="row full-width" id="headerCard"></div>
+              <a
+                v-if="headerCounter > 0"
+                @click="removeHeader"
+                style="color: red; font-weight: bold; margin-left: 10px"
+                >x</a
+              >
+            </div>
+          </div>
         </Collapsible>
       </div>
     </div>
@@ -210,8 +245,8 @@ import EndpointList from '@/components/EndpointList.vue'
 import UrlBar from '@/components/UrlBar.vue'
 import EventBus from '@/event-bus.ts'
 import SecureLS from 'secure-ls'
-import Collapsible from 'vue-collapsible-component';
-import 'vue-collapsible-component/lib/vue-collapsible.css';
+import Collapsible from 'vue-collapsible-component'
+import 'vue-collapsible-component/lib/vue-collapsible.css'
 
 const ls = new SecureLS({ encodingType: 'aes', isCompression: false })
 const tabs = [{ name: 'results' }, { name: 'raw' }, { name: 'debug' }]
@@ -223,7 +258,7 @@ export default Vue.extend({
     DataTable,
     ResourceForm,
     UrlBar,
-    Collapsible
+    Collapsible,
   },
   data() {
     return {
@@ -238,21 +273,47 @@ export default Vue.extend({
       modalContent: null as string | null,
       firing: false as boolean,
       resetting: false as boolean,
+      enableCustomHeader: null as boolean,
+      enableRemoteServerAccess: null as boolean,
       useCustomUrl: false as boolean,
       headerCounter: 0,
       headers: [],
       serverUrl: null as string,
       remoteHosts: JSON,
       showHeader: false as boolean,
-      showServerUrl: false as boolean
+      showServerUrl: false as boolean,
     }
   },
   created() {
-    this.remoteHosts = JSON.parse(
-      document
-        .querySelector("meta[name='REMOTE_HOSTS']")
-        .getAttribute('content')
-    )
+    try {
+      let hosts = JSON.parse(
+        document
+          .querySelector("meta[name='REMOTE_HOSTS']")
+          .getAttribute('content')
+      )
+      this.remoteHosts = hosts
+    } catch (error) {
+      this.remoteHosts = JSON.parse('[]')
+    }
+
+    try {
+      this.enableCustomHeader = JSON.parse(
+        document
+          .querySelector("meta[name='USE_CUSTOM_HEADER']")
+          .getAttribute('content')
+      )
+    } catch (error) {
+      this.enableCustomHeader = false
+    }
+    try {
+      this.enableRemoteServerAccess = JSON.parse(
+        document
+          .querySelector("meta[name='USE_REMOTE_HOSTS']")
+          .getAttribute('content')
+      )
+    } catch (error) {
+      this.enableRemoteServerAccess = false
+    }
   },
   watch: {
     serverUrl() {
@@ -444,10 +505,7 @@ export default Vue.extend({
         valueInput.value = ls.get(valueInput.id)
       }
 
-      child.setAttribute(
-        'style',
-        'width: 100%; margin-top: 1%;'
-      )
+      child.setAttribute('style', 'width: 100%; margin-top: 1%;')
 
       child.appendChild(icon)
       child.appendChild(keyInput)
@@ -472,12 +530,12 @@ export default Vue.extend({
       var content = document.getElementById(id)
       let contentHeadline = document.getElementById(`${id}-head`)
       contentHeadline.classList.toggle('active')
-      if (content.style.maxHeight){
-        content.style.maxHeight = null;
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null
       } else {
-        content.style.removeProperty('max-height');
-      } 
-    }
+        content.style.removeProperty('max-height')
+      }
+    },
   },
 })
 </script>
